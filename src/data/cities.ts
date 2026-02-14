@@ -36,5 +36,6 @@ export const POPULAR_CITIES: City[] = [
   { name: "Havana", country: "Cuba", coordinates: [-82.3666, 23.1136], emoji: "🇨🇺" },
   { name: "Nairobi", country: "Kenya", coordinates: [36.8219, -1.2921], emoji: "🦁" },
   { name: "Athens", country: "Greece", coordinates: [23.7275, 37.9838], emoji: "🏛️" },
-  { name: "Hong Kong", country: "China", coordinates: [114.1694, 22.3193], emoji: "🌃" },
+  { name: "Hong Kong", country: "Hong Kong", coordinates: [114.1694, 22.3193], emoji: "🌃" },
+  { name: "Taipei", country: "Taiwan", coordinates: [121.5654, 25.033], emoji: "🇹🇼" },
 ];
