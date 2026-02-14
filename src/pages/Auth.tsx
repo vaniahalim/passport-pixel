@@ -36,7 +36,7 @@ const Auth = () => {
         <div className="text-center mb-6">
           <div className="text-5xl mb-3 animate-bounce-pixel">✈️</div>
           <h1 className="font-pixel text-lg pixel-text-shadow text-foreground leading-relaxed">
-            PIXEL PASSPORT
+            PASSPORT PIXEL
           </h1>
           <p className="font-retro text-xl text-muted-foreground mt-1">
             {isLogin ? "Welcome back, traveler!" : "Start your adventure!"}

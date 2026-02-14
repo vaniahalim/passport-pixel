@@ -117,7 +117,7 @@ const Index = () => {
         </div>
 
         <footer className="mt-8 text-center font-retro text-lg text-muted-foreground">
-          🎮 Pixel Passport v1.0 — Keep exploring! 🌎
+          🎮 Passport Pixel v1.0 — Keep exploring! 🌎
         </footer>
       </div>
     </div>

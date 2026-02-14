@@ -11,7 +11,7 @@ const PassportHeader = ({ citiesCount, countriesCount }: PassportHeaderProps) =>
           <div className="text-4xl animate-bounce-pixel">✈️</div>
           <div>
             <h1 className="text-lg sm:text-xl font-pixel pixel-text-shadow text-foreground leading-relaxed">
-              PIXEL PASSPORT
+              PASSPORT PIXEL
             </h1>
             <p className="font-retro text-xl text-muted-foreground mt-1">
               Your Digital Travel Log
