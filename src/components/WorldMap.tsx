@@ -9,8 +9,28 @@ interface WorldMapProps {
   onRemoveCity: (name: string) => void;
 }
 
-const WorldMap = ({ visitedCities, onRemoveCity }: WorldMapProps) => {
+const WorldMap = ({ visitedCities }: WorldMapProps) => {
   const [tooltip, setTooltip] = useState<{ city: City; x: number; y: number } | null>(null);
+  const [position, setPosition] = useState<{ coordinates: [number, number]; zoom: number }>({
+    coordinates: [0, 30],
+    zoom: 1,
+  });
+
+  const handleGeographyClick = (geo: any) => {
+    // Get the centroid-ish coordinates from the geography's bounding box
+    const { NAME, ISO_A3 } = geo.properties;
+    // Use d3-geo to find center — approximate with known continent/country centers
+    const bounds = geo.bbox;
+    if (bounds) {
+      const lng = (bounds[0] + bounds[2]) / 2;
+      const lat = (bounds[1] + bounds[3]) / 2;
+      setPosition({ coordinates: [lng, lat], zoom: 4 });
+    }
+  };
+
+  const handleReset = () => {
+    setPosition({ coordinates: [0, 30], zoom: 1 });
+  };
 
   return (
     <div className="pixel-border-lg bg-pixel-sky relative overflow-hidden">
@@ -20,7 +40,11 @@ const WorldMap = ({ visitedCities, onRemoveCity }: WorldMapProps) => {
         style={{ width: "100%", height: "auto" }}
         height={450}
       >
-        <ZoomableGroup>
+        <ZoomableGroup
+          center={position.coordinates}
+          zoom={position.zoom}
+          onMoveEnd={({ coordinates, zoom }) => setPosition({ coordinates: coordinates as [number, number], zoom })}
+        >
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
               geographies.map((geo) => {
@@ -34,9 +58,10 @@ const WorldMap = ({ visitedCities, onRemoveCity }: WorldMapProps) => {
                     fill={isVisited ? "hsl(145, 70%, 45%)" : "hsl(120, 35%, 55%)"}
                     stroke="hsl(220, 30%, 15%)"
                     strokeWidth={0.8}
+                    onClick={() => handleGeographyClick(geo)}
                     style={{
-                      default: { outline: "none" },
-                      hover: { outline: "none", fill: isVisited ? "hsl(145, 70%, 50%)" : "hsl(120, 35%, 60%)" },
+                      default: { outline: "none", cursor: "pointer" },
+                      hover: { outline: "none", fill: isVisited ? "hsl(145, 70%, 50%)" : "hsl(120, 35%, 60%)", cursor: "pointer" },
                       pressed: { outline: "none" },
                     }}
                   />
@@ -96,9 +121,19 @@ const WorldMap = ({ visitedCities, onRemoveCity }: WorldMapProps) => {
         </div>
       )}
 
-      {/* Water label */}
-      <div className="absolute bottom-2 left-2 font-retro text-sm text-foreground opacity-50">
-        🌊 Scroll to zoom
+      {/* Controls */}
+      <div className="absolute bottom-2 left-2 flex items-center gap-2">
+        <span className="font-retro text-sm text-foreground opacity-50">
+          🌊 Click country to zoom
+        </span>
+        {position.zoom > 1 && (
+          <button
+            onClick={handleReset}
+            className="font-pixel text-[8px] bg-card text-card-foreground pixel-border-sm px-2 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+          >
+            🌍 RESET
+          </button>
+        )}
       </div>
     </div>
   );
