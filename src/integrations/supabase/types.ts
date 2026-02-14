@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      visited_cities: {
+        Row: {
+          city_name: string
+          coordinates: Json
+          country: string
+          created_at: string
+          emoji: string
+          id: string
+          user_id: string
+          visited_date: string | null
+        }
+        Insert: {
+          city_name: string
+          coordinates: Json
+          country: string
+          created_at?: string
+          emoji: string
+          id?: string
+          user_id: string
+          visited_date?: string | null
+        }
+        Update: {
+          city_name?: string
+          coordinates?: Json
+          country?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          user_id?: string
+          visited_date?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
