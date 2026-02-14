@@ -60,8 +60,7 @@ const WorldMap = ({ visitedCities, onRemoveCity }: WorldMapProps) => {
                 }
               }}
               onMouseLeave={() => setTooltip(null)}
-              onClick={() => onRemoveCity(city.name)}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "default" }}
             >
               <g>
                 <rect
@@ -99,7 +98,7 @@ const WorldMap = ({ visitedCities, onRemoveCity }: WorldMapProps) => {
 
       {/* Water label */}
       <div className="absolute bottom-2 left-2 font-retro text-sm text-foreground opacity-50">
-        🌊 Scroll to zoom • Click marker to remove
+        🌊 Scroll to zoom
       </div>
     </div>
   );
