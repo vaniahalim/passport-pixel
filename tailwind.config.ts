@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        pixel: ['"Press Start 2P"', 'monospace'],
+        retro: ['"VT323"', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -47,6 +51,18 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        pixel: {
+          yellow: "hsl(var(--pixel-yellow))",
+          blue: "hsl(var(--pixel-blue))",
+          green: "hsl(var(--pixel-green))",
+          red: "hsl(var(--pixel-red))",
+          orange: "hsl(var(--pixel-orange))",
+          purple: "hsl(var(--pixel-purple))",
+          brown: "hsl(var(--pixel-brown))",
+          sky: "hsl(var(--pixel-sky))",
+          water: "hsl(var(--pixel-water))",
+          land: "hsl(var(--pixel-land))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -65,25 +81,27 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "bounce-pixel": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        "blink": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "bounce-pixel": "bounce-pixel 0.6s ease-in-out",
+        "blink": "blink 1s step-end infinite",
       },
     },
   },
