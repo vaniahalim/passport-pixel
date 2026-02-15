@@ -18,13 +18,14 @@ interface PassportHeaderProps {
 const PassportHeader = ({ citiesCount, countriesCount, visitedCities = [] }: PassportHeaderProps) => {
   const [open, setOpen] = useState(false);
 
+  const lovedCities = useMemo(() => visitedCities.filter(c => c.liked), [visitedCities]);
+
   const groupedByCountry = useMemo(() => {
     const groups: Record<string, City[]> = {};
     for (const city of visitedCities) {
       if (!groups[city.country]) groups[city.country] = [];
       groups[city.country].push(city);
     }
-    // Sort countries alphabetically, then cities within each country
     return Object.entries(groups)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([country, cities]) => ({
@@ -58,6 +59,10 @@ const PassportHeader = ({ citiesCount, countriesCount, visitedCities = [] }: Pas
               <div className="bg-pixel-blue pixel-border-sm px-4 py-3 text-center group-hover:brightness-110 transition">
                 <div className="font-pixel text-lg text-secondary-foreground">{countriesCount}</div>
                 <div className="font-retro text-sm text-secondary-foreground">COUNTRIES</div>
+              </div>
+              <div className="bg-accent pixel-border-sm px-4 py-3 text-center group-hover:brightness-110 transition">
+                <div className="font-pixel text-lg text-accent-foreground">{lovedCities.length}</div>
+                <div className="font-retro text-sm text-accent-foreground">❤️ LOVED</div>
               </div>
             </div>
           </DialogTrigger>
