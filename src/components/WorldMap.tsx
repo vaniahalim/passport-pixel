@@ -1,5 +1,5 @@
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
-import { geoBounds } from "d3-geo";
+import { geoBounds, geoCentroid } from "d3-geo";
 import { City } from "@/data/cities";
 import { useState, useMemo } from "react";
 
@@ -23,13 +23,13 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
   const handleGeographyClick = (geo: any) => {
     try {
       const [[x0, y0], [x1, y1]] = geoBounds(geo);
-      const lng = (x0 + x1) / 2;
-      const lat = (y0 + y1) / 2;
-      const widthSpan = Math.abs(x1 - x0);
+      const [cLng, cLat] = geoCentroid(geo);
+      // Handle antimeridian-crossing countries (e.g. Russia, Fiji)
+      const widthSpan = x1 >= x0 ? (x1 - x0) : (360 - x0 + x1);
       const heightSpan = Math.abs(y1 - y0);
       const maxSpan = Math.max(widthSpan, heightSpan);
       const zoom = Math.min(Math.max(300 / maxSpan, 2), 20);
-      setPosition({ coordinates: [lng, lat], zoom });
+      setPosition({ coordinates: [cLng, cLat], zoom });
     } catch {
       // fallback
     }
