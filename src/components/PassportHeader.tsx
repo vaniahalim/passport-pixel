@@ -16,7 +16,7 @@ interface PassportHeaderProps {
 }
 
 const PassportHeader = ({ citiesCount, countriesCount, visitedCities = [] }: PassportHeaderProps) => {
-  const [open, setOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState<"cities" | "countries" | "loved" | null>(null);
 
   const lovedCities = useMemo(() => visitedCities.filter(c => c.liked), [visitedCities]);
 
@@ -34,6 +34,11 @@ const PassportHeader = ({ citiesCount, countriesCount, visitedCities = [] }: Pas
       }));
   }, [visitedCities]);
 
+  const uniqueCountries = useMemo(() =>
+    [...new Set(visitedCities.map(c => c.country))].sort(),
+    [visitedCities]
+  );
+
   return (
     <header className="bg-card pixel-border-lg p-6 mb-6">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -49,60 +54,124 @@ const PassportHeader = ({ citiesCount, countriesCount, visitedCities = [] }: Pas
           </div>
         </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <div className="flex gap-4 cursor-pointer group">
-              <div className="bg-pixel-green pixel-border-sm px-4 py-3 text-center group-hover:brightness-110 transition">
-                <div className="font-pixel text-lg text-primary-foreground">{citiesCount}</div>
-                <div className="font-retro text-sm text-primary-foreground">CITIES</div>
-              </div>
-              <div className="bg-pixel-blue pixel-border-sm px-4 py-3 text-center group-hover:brightness-110 transition">
-                <div className="font-pixel text-lg text-secondary-foreground">{countriesCount}</div>
-                <div className="font-retro text-sm text-secondary-foreground">COUNTRIES</div>
-              </div>
-              <div className="bg-accent pixel-border-sm px-4 py-3 text-center group-hover:brightness-110 transition">
-                <div className="font-pixel text-lg text-accent-foreground">{lovedCities.length}</div>
-                <div className="font-retro text-sm text-accent-foreground">❤️ LOVED</div>
-              </div>
-            </div>
-          </DialogTrigger>
-          <DialogContent className="pixel-border bg-card max-w-md">
-            <DialogHeader>
-              <DialogTitle className="font-pixel text-xs text-card-foreground">
-                🌍 VISITED PLACES ({citiesCount} cities, {countriesCount} countries)
-              </DialogTitle>
-            </DialogHeader>
-            {groupedByCountry.length === 0 ? (
-              <p className="font-retro text-lg text-muted-foreground text-center py-4">
-                No cities visited yet! Start adding some 🗺️
-              </p>
-            ) : (
-              <ScrollArea className="max-h-[400px]">
-                <div className="space-y-4 pr-3">
-                  {groupedByCountry.map(({ country, cities }) => (
-                    <div key={country}>
-                      <h3 className="font-pixel text-[9px] text-accent mb-1.5 sticky top-0 bg-card py-1">
-                        {country} ({cities.length})
-                      </h3>
-                      <div className="space-y-1 ml-2">
-                        {cities.map((city) => (
-                          <div key={city.name} className="flex items-center gap-2 font-retro text-lg text-foreground">
-                            <span>{city.emoji}</span>
-                            <span>{city.name}</span>
-                            {city.date && (
-                              <span className="text-muted-foreground text-sm ml-auto">{city.date}</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-4">
+          <div
+            className="bg-pixel-green pixel-border-sm px-4 py-3 text-center cursor-pointer hover:brightness-110 transition"
+            onClick={() => setOpenDialog("cities")}
+          >
+            <div className="font-pixel text-lg text-primary-foreground">{citiesCount}</div>
+            <div className="font-retro text-sm text-primary-foreground">CITIES</div>
+          </div>
+          <div
+            className="bg-pixel-blue pixel-border-sm px-4 py-3 text-center cursor-pointer hover:brightness-110 transition"
+            onClick={() => setOpenDialog("countries")}
+          >
+            <div className="font-pixel text-lg text-secondary-foreground">{countriesCount}</div>
+            <div className="font-retro text-sm text-secondary-foreground">COUNTRIES</div>
+          </div>
+          <div
+            className="bg-accent pixel-border-sm px-4 py-3 text-center cursor-pointer hover:brightness-110 transition"
+            onClick={() => setOpenDialog("loved")}
+          >
+            <div className="font-pixel text-lg text-accent-foreground">{lovedCities.length}</div>
+            <div className="font-retro text-sm text-accent-foreground">❤️ LOVED</div>
+          </div>
+        </div>
       </div>
+
+      {/* Cities dialog */}
+      <Dialog open={openDialog === "cities"} onOpenChange={(o) => !o && setOpenDialog(null)}>
+        <DialogContent className="pixel-border bg-card max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-pixel text-xs text-card-foreground">
+              🏙️ VISITED CITIES ({citiesCount})
+            </DialogTitle>
+          </DialogHeader>
+          {groupedByCountry.length === 0 ? (
+            <p className="font-retro text-lg text-muted-foreground text-center py-4">
+              No cities visited yet! 🗺️
+            </p>
+          ) : (
+            <ScrollArea className="max-h-[400px]">
+              <div className="space-y-4 pr-3">
+                {groupedByCountry.map(({ country, cities }) => (
+                  <div key={country}>
+                    <h3 className="font-pixel text-[9px] text-accent mb-1.5 sticky top-0 bg-card py-1">
+                      {country} ({cities.length})
+                    </h3>
+                    <div className="space-y-1 ml-2">
+                      {cities.map((city) => (
+                        <div key={city.name} className="flex items-center gap-2 font-retro text-lg text-foreground">
+                          <span>{city.liked ? "❤️" : city.emoji}</span>
+                          <span>{city.name}</span>
+                          {city.date && (
+                            <span className="text-muted-foreground text-sm ml-auto">{city.date}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Countries dialog */}
+      <Dialog open={openDialog === "countries"} onOpenChange={(o) => !o && setOpenDialog(null)}>
+        <DialogContent className="pixel-border bg-card max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-pixel text-xs text-card-foreground">
+              🌍 COUNTRIES VISITED ({countriesCount})
+            </DialogTitle>
+          </DialogHeader>
+          {uniqueCountries.length === 0 ? (
+            <p className="font-retro text-lg text-muted-foreground text-center py-4">
+              No countries yet! 🗺️
+            </p>
+          ) : (
+            <ScrollArea className="max-h-[400px]">
+              <div className="space-y-2 pr-3">
+                {uniqueCountries.map((country) => (
+                  <div key={country} className="flex items-center gap-2 font-retro text-lg text-foreground px-2 py-1 bg-muted pixel-border-sm">
+                    <span>🏳️</span>
+                    <span>{country}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Loved dialog */}
+      <Dialog open={openDialog === "loved"} onOpenChange={(o) => !o && setOpenDialog(null)}>
+        <DialogContent className="pixel-border bg-card max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-pixel text-xs text-card-foreground">
+              ❤️ LOVED CITIES ({lovedCities.length})
+            </DialogTitle>
+          </DialogHeader>
+          {lovedCities.length === 0 ? (
+            <p className="font-retro text-lg text-muted-foreground text-center py-4">
+              No loved cities yet! Click pins on the map to ❤️
+            </p>
+          ) : (
+            <ScrollArea className="max-h-[400px]">
+              <div className="space-y-2 pr-3">
+                {[...lovedCities].sort((a, b) => a.name.localeCompare(b.name)).map((city) => (
+                  <div key={city.name} className="flex items-center gap-2 font-retro text-lg text-foreground px-2 py-1 bg-muted pixel-border-sm">
+                    <span>❤️</span>
+                    <span>{city.name}</span>
+                    <span className="text-muted-foreground text-sm ml-auto">{city.country}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
     </header>
   );
 };
