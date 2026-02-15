@@ -4,6 +4,8 @@ export interface City {
   coordinates: [number, number]; // [longitude, latitude]
   emoji: string;
   date?: string;
+  liked?: boolean;
+  description?: string;
 }
 
 // Ordered roughly by international tourist popularity / visitor arrivals

@@ -32,6 +32,8 @@ const Index = () => {
             emoji: row.emoji,
             coordinates: row.coordinates as unknown as [number, number],
             date: row.visited_date ?? undefined,
+            liked: row.liked ?? false,
+            description: row.description ?? undefined,
           }))
         );
       }
@@ -83,6 +85,53 @@ const Index = () => {
     [user]
   );
 
+  const toggleLike = useCallback(
+    async (name: string) => {
+      if (!user) return;
+      const city = visitedCities.find((c) => c.name === name);
+      if (!city) return;
+      const newLiked = !city.liked;
+
+      const { error } = await supabase
+        .from("visited_cities")
+        .update({ liked: newLiked })
+        .eq("user_id", user.id)
+        .eq("city_name", name);
+
+      if (error) {
+        toast.error("Failed to update");
+        console.error(error);
+      } else {
+        setVisitedCities((prev) =>
+          prev.map((c) => (c.name === name ? { ...c, liked: newLiked } : c))
+        );
+      }
+    },
+    [user, visitedCities]
+  );
+
+  const updateDescription = useCallback(
+    async (name: string, description: string) => {
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("visited_cities")
+        .update({ description })
+        .eq("user_id", user.id)
+        .eq("city_name", name);
+
+      if (error) {
+        toast.error("Failed to update description");
+        console.error(error);
+      } else {
+        setVisitedCities((prev) =>
+          prev.map((c) => (c.name === name ? { ...c, description } : c))
+        );
+      }
+    },
+    [user]
+  );
+
   const uniqueCountries = new Set(visitedCities.map((c) => c.country)).size;
 
   if (loading) {
@@ -108,12 +157,12 @@ const Index = () => {
         <PassportHeader citiesCount={visitedCities.length} countriesCount={uniqueCountries} visitedCities={visitedCities} />
 
         <div className="mb-6">
-          <WorldMap visitedCities={visitedCities} onRemoveCity={removeCity} />
+          <WorldMap visitedCities={visitedCities} onRemoveCity={removeCity} onToggleLike={toggleLike} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <CityPicker visitedCities={visitedCities} onAddCity={addCity} />
-          <VisitedList cities={visitedCities} onRemove={removeCity} />
+          <VisitedList cities={visitedCities} onRemove={removeCity} onToggleLike={toggleLike} onUpdateDescription={updateDescription} />
         </div>
 
         <footer className="mt-8 text-center font-retro text-lg text-muted-foreground">
