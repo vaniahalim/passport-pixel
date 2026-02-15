@@ -1,36 +1,43 @@
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
 import { City } from "@/data/cities";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 interface WorldMapProps {
   visitedCities: City[];
   onRemoveCity: (name: string) => void;
+  onToggleLike?: (name: string) => void;
 }
 
-const WorldMap = ({ visitedCities }: WorldMapProps) => {
+const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
   const [tooltip, setTooltip] = useState<{ city: City; x: number; y: number } | null>(null);
   const [position, setPosition] = useState<{ coordinates: [number, number]; zoom: number }>({
     coordinates: [0, 30],
     zoom: 1,
   });
 
+  const likedSet = useMemo(() => new Set(visitedCities.filter(c => c.liked).map(c => c.name)), [visitedCities]);
+
   const handleGeographyClick = (geo: any) => {
-    // Get the centroid-ish coordinates from the geography's bounding box
-    const { NAME, ISO_A3 } = geo.properties;
-    // Use d3-geo to find center — approximate with known continent/country centers
     const bounds = geo.bbox;
     if (bounds) {
       const lng = (bounds[0] + bounds[2]) / 2;
       const lat = (bounds[1] + bounds[3]) / 2;
-      setPosition({ coordinates: [lng, lat], zoom: 4 });
+      const widthSpan = bounds[2] - bounds[0];
+      const heightSpan = bounds[3] - bounds[1];
+      const maxSpan = Math.max(widthSpan, heightSpan);
+      // Calculate zoom to fit the country roughly to screen
+      const zoom = Math.min(Math.max(360 / maxSpan * 0.8, 2), 20);
+      setPosition({ coordinates: [lng, lat], zoom });
     }
   };
 
   const handleReset = () => {
     setPosition({ coordinates: [0, 30], zoom: 1 });
   };
+
+  const markerScale = 1 / position.zoom;
 
   return (
     <div className="pixel-border-lg bg-pixel-sky relative overflow-hidden">
@@ -70,43 +77,62 @@ const WorldMap = ({ visitedCities }: WorldMapProps) => {
             }
           </Geographies>
 
-          {visitedCities.map((city) => (
-            <Marker
-              key={city.name}
-              coordinates={city.coordinates}
-              onMouseEnter={(e) => {
-                const rect = (e.target as SVGElement).closest("svg")?.getBoundingClientRect();
-                if (rect) {
-                  setTooltip({
-                    city,
-                    x: e.clientX - rect.left,
-                    y: e.clientY - rect.top,
-                  });
-                }
-              }}
-              onMouseLeave={() => setTooltip(null)}
-              style={{ cursor: "default" }}
-            >
-            <g transform={`scale(${1 / position.zoom})`}>
-                <rect
-                  x={-8}
-                  y={-8}
-                  width={16}
-                  height={16}
-                  fill="hsl(350, 85%, 55%)"
-                  stroke="hsl(220, 30%, 15%)"
-                  strokeWidth={2}
-                />
-                <rect
-                  x={-4}
-                  y={-4}
-                  width={8}
-                  height={8}
-                  fill="hsl(45, 95%, 58%)"
-                />
-              </g>
-            </Marker>
-          ))}
+          {visitedCities.map((city) => {
+            const isLiked = likedSet.has(city.name);
+            return (
+              <Marker
+                key={city.name}
+                coordinates={city.coordinates}
+                onMouseEnter={(e) => {
+                  const rect = (e.target as SVGElement).closest("svg")?.getBoundingClientRect();
+                  if (rect) {
+                    setTooltip({
+                      city,
+                      x: e.clientX - rect.left,
+                      y: e.clientY - rect.top,
+                    });
+                  }
+                }}
+                onMouseLeave={() => setTooltip(null)}
+                onClick={() => onToggleLike?.(city.name)}
+                style={{ cursor: "pointer" }}
+              >
+                <g transform={`scale(${markerScale})`}>
+                  {isLiked ? (
+                    // Heart shape
+                    <g>
+                      <path
+                        d="M0 -4 C-2 -8, -8 -8, -8 -4 C-8 0, 0 6, 0 8 C0 6, 8 0, 8 -4 C8 -8, 2 -8, 0 -4Z"
+                        fill="hsl(350, 85%, 55%)"
+                        stroke="hsl(220, 30%, 15%)"
+                        strokeWidth={1.5}
+                      />
+                    </g>
+                  ) : (
+                    // Pixel pin
+                    <g>
+                      <rect
+                        x={-8}
+                        y={-8}
+                        width={16}
+                        height={16}
+                        fill="hsl(350, 85%, 55%)"
+                        stroke="hsl(220, 30%, 15%)"
+                        strokeWidth={2}
+                      />
+                      <rect
+                        x={-4}
+                        y={-4}
+                        width={8}
+                        height={8}
+                        fill="hsl(45, 95%, 58%)"
+                      />
+                    </g>
+                  )}
+                </g>
+              </Marker>
+            );
+          })}
         </ZoomableGroup>
       </ComposableMap>
 
@@ -115,8 +141,16 @@ const WorldMap = ({ visitedCities }: WorldMapProps) => {
           className="absolute pointer-events-none pixel-border-sm bg-card px-3 py-2 z-10"
           style={{ left: tooltip.x + 10, top: tooltip.y - 40 }}
         >
-          <span className="font-pixel text-[8px] text-card-foreground">
+          <span className="font-pixel text-[8px] text-card-foreground block">
             {tooltip.city.emoji} {tooltip.city.name}
+          </span>
+          {tooltip.city.description && (
+            <span className="font-retro text-sm text-muted-foreground block mt-0.5">
+              {tooltip.city.description}
+            </span>
+          )}
+          <span className="font-retro text-[10px] text-muted-foreground block mt-0.5">
+            {tooltip.city.liked ? "❤️ Loved" : "Click to ❤️"}
           </span>
         </div>
       )}
@@ -124,7 +158,7 @@ const WorldMap = ({ visitedCities }: WorldMapProps) => {
       {/* Controls */}
       <div className="absolute bottom-2 left-2 flex items-center gap-2">
         <span className="font-retro text-sm text-foreground opacity-50">
-          🌊 Click country to zoom
+          🌊 Pinch/scroll to zoom · Click country to expand
         </span>
         {position.zoom > 1 && (
           <button

@@ -35,8 +35,10 @@ export type Database = {
           coordinates: Json
           country: string
           created_at: string
+          description: string | null
           emoji: string
           id: string
+          liked: boolean
           user_id: string
           visited_date: string | null
         }
@@ -45,8 +47,10 @@ export type Database = {
           coordinates: Json
           country: string
           created_at?: string
+          description?: string | null
           emoji: string
           id?: string
+          liked?: boolean
           user_id: string
           visited_date?: string | null
         }
@@ -55,8 +59,10 @@ export type Database = {
           coordinates?: Json
           country?: string
           created_at?: string
+          description?: string | null
           emoji?: string
           id?: string
+          liked?: boolean
           user_id?: string
           visited_date?: string | null
         }
