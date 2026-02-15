@@ -20,16 +20,18 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
 
   const likedSet = useMemo(() => new Set(visitedCities.filter(c => c.liked).map(c => c.name)), [visitedCities]);
 
+  const [selectedCountry, setSelectedCountry] = useState<{ name: string; coordinates: [number, number] } | null>(null);
+
   const handleGeographyClick = (geo: any) => {
     try {
       const [[x0, y0], [x1, y1]] = geoBounds(geo);
       const [cLng, cLat] = geoCentroid(geo);
-      // Handle antimeridian-crossing countries (e.g. Russia, Fiji)
       const widthSpan = x1 >= x0 ? (x1 - x0) : (360 - x0 + x1);
       const heightSpan = Math.abs(y1 - y0);
       const maxSpan = Math.max(widthSpan, heightSpan);
       const zoom = Math.min(Math.max(300 / maxSpan, 2), 20);
       setPosition({ coordinates: [cLng, cLat], zoom });
+      setSelectedCountry({ name: geo.properties.name, coordinates: [cLng, cLat] });
     } catch {
       // fallback
     }
@@ -37,6 +39,7 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
 
   const handleReset = () => {
     setPosition({ coordinates: [0, 30], zoom: 1 });
+    setSelectedCountry(null);
   };
 
   const markerScale = 1 / position.zoom;
@@ -78,6 +81,27 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
               })
             }
           </Geographies>
+
+          {/* Country name label when zoomed */}
+          {selectedCountry && position.zoom > 1 && (
+            <Marker coordinates={selectedCountry.coordinates}>
+              <text
+                textAnchor="middle"
+                dominantBaseline="central"
+                style={{
+                  fontFamily: "'Press Start 2P', monospace",
+                  fontSize: `${Math.max(6, 10 / position.zoom * 3)}px`,
+                  fill: "hsl(220, 30%, 15%)",
+                  stroke: "hsl(0, 0%, 100%)",
+                  strokeWidth: 3 / position.zoom,
+                  paintOrder: "stroke",
+                  pointerEvents: "none",
+                }}
+              >
+                {selectedCountry.name}
+              </text>
+            </Marker>
+          )}
 
           {visitedCities.map((city) => {
             const isLiked = likedSet.has(city.name);
