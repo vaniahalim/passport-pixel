@@ -105,7 +105,7 @@ const Index = () => {
           </button>
         </div>
 
-        <PassportHeader citiesCount={visitedCities.length} countriesCount={uniqueCountries} />
+        <PassportHeader citiesCount={visitedCities.length} countriesCount={uniqueCountries} visitedCities={visitedCities} />
 
         <div className="mb-6">
           <WorldMap visitedCities={visitedCities} onRemoveCity={removeCity} />
