@@ -54,14 +54,14 @@ const VisitedList = ({ cities, onRemove, onToggleLike, onUpdateDescription }: Vi
                   setEditingCity(editingCity === city.name ? null : city.name);
                   setDraftDesc(city.description ?? "");
                 }}
-                className="font-pixel text-[8px] text-muted-foreground hover:text-foreground cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                className="text-base text-muted-foreground hover:text-foreground cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
                 title="Add note"
               >
                 📝
               </button>
               <button
                 onClick={() => onRemove(city.name)}
-                className="font-pixel text-[8px] text-accent hover:text-accent/80 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                className="text-base text-accent hover:text-accent/80 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 ✕
               </button>
