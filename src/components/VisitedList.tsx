@@ -76,8 +76,9 @@ const VisitedList = ({ cities, onRemove, onToggleLike, onUpdateDescription }: Vi
                 <input
                   className="flex-1 font-retro text-sm bg-background text-foreground px-2 py-1 pixel-border-sm outline-none"
                   value={draftDesc}
-                  onChange={(e) => setDraftDesc(e.target.value)}
-                  placeholder="Add a memory..."
+                  onChange={(e) => setDraftDesc(e.target.value.slice(0, 500))}
+                  placeholder="Add a memory... (max 500 chars)"
+                  maxLength={500}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       onUpdateDescription?.(city.name, draftDesc);

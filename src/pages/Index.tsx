@@ -114,9 +114,15 @@ const Index = () => {
     async (name: string, description: string) => {
       if (!user) return;
 
+      const trimmed = description.trim();
+      if (trimmed.length > 500) {
+        toast.error("Description too long (max 500 characters)");
+        return;
+      }
+
       const { error } = await supabase
         .from("visited_cities")
-        .update({ description })
+        .update({ description: trimmed })
         .eq("user_id", user.id)
         .eq("city_name", name);
 
