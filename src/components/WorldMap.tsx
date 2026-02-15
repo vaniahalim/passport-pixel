@@ -55,7 +55,10 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
         <ZoomableGroup
           center={position.coordinates}
           zoom={position.zoom}
-          onMoveEnd={({ coordinates, zoom }) => setPosition({ coordinates: coordinates as [number, number], zoom })}
+          onMoveEnd={({ coordinates, zoom }) => {
+            setPosition({ coordinates: coordinates as [number, number], zoom });
+            setSelectedCountry(null);
+          }}
         >
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
@@ -89,12 +92,10 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
                 textAnchor="middle"
                 dominantBaseline="central"
                 style={{
-                  fontFamily: "'Press Start 2P', monospace",
-                  fontSize: `${Math.max(6, 10 / position.zoom * 3)}px`,
-                  fill: "hsl(220, 30%, 15%)",
-                  stroke: "hsl(0, 0%, 100%)",
-                  strokeWidth: 3 / position.zoom,
-                  paintOrder: "stroke",
+                  fontFamily: "'VT323', monospace",
+                  fontSize: `${Math.max(4, 6 / position.zoom * 3)}px`,
+                  fill: "hsl(0, 0%, 55%)",
+                  opacity: 0.5,
                   pointerEvents: "none",
                 }}
               >
