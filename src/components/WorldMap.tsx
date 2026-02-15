@@ -1,4 +1,5 @@
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
+import { geoBounds } from "d3-geo";
 import { City } from "@/data/cities";
 import { useState, useMemo } from "react";
 
@@ -20,16 +21,17 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
   const likedSet = useMemo(() => new Set(visitedCities.filter(c => c.liked).map(c => c.name)), [visitedCities]);
 
   const handleGeographyClick = (geo: any) => {
-    const bounds = geo.bbox;
-    if (bounds) {
-      const lng = (bounds[0] + bounds[2]) / 2;
-      const lat = (bounds[1] + bounds[3]) / 2;
-      const widthSpan = bounds[2] - bounds[0];
-      const heightSpan = bounds[3] - bounds[1];
+    try {
+      const [[x0, y0], [x1, y1]] = geoBounds(geo);
+      const lng = (x0 + x1) / 2;
+      const lat = (y0 + y1) / 2;
+      const widthSpan = Math.abs(x1 - x0);
+      const heightSpan = Math.abs(y1 - y0);
       const maxSpan = Math.max(widthSpan, heightSpan);
-      // Calculate zoom to fit the country roughly to screen
-      const zoom = Math.min(Math.max(360 / maxSpan * 0.8, 2), 20);
+      const zoom = Math.min(Math.max(300 / maxSpan, 2), 20);
       setPosition({ coordinates: [lng, lat], zoom });
+    } catch {
+      // fallback
     }
   };
 
@@ -149,25 +151,29 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
               {tooltip.city.description}
             </span>
           )}
-          <span className="font-retro text-[10px] text-muted-foreground block mt-0.5">
-            {tooltip.city.liked ? "❤️ Loved" : "Click to ❤️"}
-          </span>
+          {tooltip.city.liked && (
+            <span className="font-retro text-[10px] text-muted-foreground block mt-0.5">
+              ❤️ Loved
+            </span>
+          )}
         </div>
       )}
 
       {/* Controls */}
-      <div className="absolute bottom-2 left-2 flex items-center gap-2">
+      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
         <span className="font-retro text-sm text-foreground opacity-50">
-          🌊 Pinch/scroll to zoom · Click country to expand
+          🌊 Pinch/scroll to zoom · Click country to expand · Click pin to ❤️
         </span>
-        {position.zoom > 1 && (
-          <button
-            onClick={handleReset}
-            className="font-pixel text-[8px] bg-card text-card-foreground pixel-border-sm px-2 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-          >
-            🌍 RESET
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {position.zoom > 1 && (
+            <button
+              onClick={handleReset}
+              className="font-pixel text-[8px] bg-card text-card-foreground pixel-border-sm px-2 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              🌍 RESET
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
