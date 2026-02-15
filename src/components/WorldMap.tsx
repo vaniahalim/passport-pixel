@@ -87,7 +87,7 @@ const WorldMap = ({ visitedCities }: WorldMapProps) => {
               onMouseLeave={() => setTooltip(null)}
               style={{ cursor: "default" }}
             >
-              <g>
+            <g transform={`scale(${1 / position.zoom})`}>
                 <rect
                   x={-8}
                   y={-8}
