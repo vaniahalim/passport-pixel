@@ -46,7 +46,7 @@ const VisitedList = ({ cities, onRemove, onToggleLike, onUpdateDescription }: Vi
               <div className="flex-1 min-w-0">
                 <span className="font-pixel text-[8px] block truncate text-foreground">{city.name}</span>
                 <span className="font-retro text-sm text-muted-foreground">
-                  {city.country} {city.date && `• ${city.date}`}
+                  {city.country}
                 </span>
               </div>
               <button
