@@ -94,8 +94,8 @@ const WorldMap = ({ visitedCities, onToggleLike }: WorldMapProps) => {
                 style={{
                   fontFamily: "'VT323', monospace",
                   fontSize: `${Math.max(4, 6 / position.zoom * 3)}px`,
-                  fill: "hsl(0, 0%, 55%)",
-                  opacity: 0.5,
+                  fill: "hsl(0, 0%, 35%)",
+                  opacity: 0.7,
                   pointerEvents: "none",
                 }}
               >
