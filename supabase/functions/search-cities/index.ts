@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
@@ -21,7 +21,7 @@ serve(async (req) => {
     }
 
     // Use Nominatim (OpenStreetMap) geocoding - free, no API key needed
-    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=15&featuretype=city&accept-language=en`;
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=20&accept-language=en`;
 
     const response = await fetch(nominatimUrl, {
       headers: {
@@ -35,15 +35,18 @@ serve(async (req) => {
 
     const results = await response.json();
 
-    // Map to our City format, filtering for places (cities/towns)
-    const validTypes = ['city', 'town', 'village', 'municipality', 'administrative'];
+    // Map to our City format - accept broader types to catch more cities
     const cities = results
-      .filter((r: any) => r.type && (validTypes.includes(r.type) || r.class === 'place' || r.class === 'boundary'))
+      .filter((r: any) => {
+        const t = r.type || '';
+        const c = r.class || '';
+        return c === 'place' || c === 'boundary' || 
+               ['city', 'town', 'village', 'municipality', 'administrative', 'suburb', 'hamlet', 'district'].includes(t);
+      })
       .map((r: any) => {
         const addr = r.address || {};
         const country = addr.country || '';
         const cityName = addr.city || addr.town || addr.village || addr.municipality || r.name || '';
-        // Get country code for flag emoji
         const countryCode = (addr.country_code || '').toUpperCase();
         const flagEmoji = countryCode.length === 2
           ? String.fromCodePoint(...[...countryCode].map(c => 0x1F1E6 + c.charCodeAt(0) - 65))
