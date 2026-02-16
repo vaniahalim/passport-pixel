@@ -1,1 +1,4 @@
 project_id = "hcecngsvuynwlpejrawj"
+
+[functions.search-cities]
+verify_jwt = false
