@@ -19,6 +19,7 @@ const Index = () => {
       const { data, error } = await supabase
         .from("visited_cities")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: true });
 
       if (error) {
