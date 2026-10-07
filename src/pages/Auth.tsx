@@ -3,8 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const toEmail = (n: string) =>
+  `${Array.from(n.toLowerCase()).map((c) => c.codePointAt(0)!.toString(16)).join("-")}@passport-pixel.app`;
+const toPassword = (pin: string) => `pp-pin-${pin}-passport`;
+
 const Auth = () => {
   const [name, setName] = useState("");
+  const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [taken, setTaken] = useState(false);
   const navigate = useNavigate();
@@ -16,8 +21,17 @@ const Auth = () => {
       toast.error("Name must be 2–30 characters");
       return;
     }
+    if (!/^\d{4,6}$/.test(pin)) {
+      toast.error("PIN must be 4–6 digits");
+      return;
+    }
     setLoading(true);
     setTaken(false);
+    const email = toEmail(trimmed);
+    const password = toPassword(pin);
+
+    const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+    if (!signInErr) { setLoading(false); return; }
 
     const { data: existing } = await supabase
       .from("profiles")
@@ -31,7 +45,7 @@ const Auth = () => {
       return;
     }
 
-    const { data, error } = await supabase.auth.signInAnonymously();
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error || !data.user) {
       toast.error(error?.message ?? "Could not start");
       setLoading(false);
@@ -71,10 +85,22 @@ const Auth = () => {
               placeholder="Vania"
             />
           </div>
+          <div>
+            <label className="font-pixel text-[8px] text-card-foreground block mb-1">PIN (4–6 DIGITS)</label>
+            <input
+              value={pin}
+              onChange={(e) => { setPin(e.target.value.replace(/\D/g, "").slice(0, 6)); setTaken(false); }}
+              required
+              inputMode="numeric"
+              type="password"
+              className="w-full pixel-border-sm bg-background text-foreground font-retro text-lg px-3 py-2 outline-none placeholder:text-muted-foreground tracking-widest"
+              placeholder="••••"
+            />
+          </div>
 
           {taken && (
             <div className="font-retro text-lg text-muted-foreground text-center">
-              That name already has a passport.{" "}
+              Wrong PIN for that name.{" "}
               <button
                 type="button"
                 onClick={() => navigate(`/p/${encodeURIComponent(name.trim())}`)}
@@ -94,7 +120,7 @@ const Auth = () => {
             {loading ? "LOADING..." : "▶ START"}
           </button>
           <p className="font-retro text-base text-center text-muted-foreground">
-            Your passport is editable only from this device. Others can view it by name.
+            New name? Pick a PIN to claim it. Returning? Use your name + PIN on any device. Names aren't case-sensitive.
           </p>
         </form>
       </div>
