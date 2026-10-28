@@ -23,7 +23,7 @@ claimed once. If a name is already taken, the sign-in screen offers a link to vi
 instead of letting you claim it.
 
 ### The map
-- **211 built-in cities** across every continent, plus worldwide search for anything else.
+- **211 built-in cities** spanning 115 countries, plus worldwide search for anything else.
 - **Click a country** to expand its territory to the full screen, with its name labelled in the
   middle; the label fades the moment you scroll again.
 - **Pinch or scroll to zoom**, and pins shrink as you zoom in so they never cover the map.
