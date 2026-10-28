@@ -1,73 +1,214 @@
-# Welcome to your Lovable project
+# Passport Pixel ✈️🗺️
 
-## Project info
+**Your digital travel passport — collect the cities you've visited on a pixel-art world map.**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Passport Pixel is a retro-styled travel log. Instead of a list of places, you get a world map you can
+explore: every city you've been to drops a chunky pixel pin onto it. Click a country and the map zooms
+to fill the screen with just that territory. Click a pin and it turns into a heart. Add a note and it
+shows up when you hover the pin. It's meant to feel like an arcade collect-'em-up — inspired by the
+bright, chunky look of Crossy Road — rather than a spreadsheet of trips.
 
-## How can I edit this code?
+**Live app:** https://passport-pixel.lovable.app
+**View any passport:** `https://passport-pixel.lovable.app/p/<username>`
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## What it does
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Sign in with a username and a PIN
+There's no email, no password reset, no "verify your inbox". You pick a username (letters, numbers,
+`_` and `.`, 2–30 characters) and a 4-digit PIN, and that's your account. Usernames are
+case-insensitive — `Vania`, `vania` and `VANIA` are the same traveler — and each one can only be
+claimed once. If a name is already taken, the sign-in screen offers a link to view that passport
+instead of letting you claim it.
 
-Changes made via Lovable will be committed automatically to this repo.
+### The map
+- **211 built-in cities** spanning 115 countries, plus worldwide search for anything else.
+- **Click a country** to expand its territory to the full screen, with its name labelled in the
+  middle; the label fades the moment you scroll again.
+- **Pinch or scroll to zoom**, and pins shrink as you zoom in so they never cover the map.
+- **Click a pin to ❤️ it** — the pixel pin becomes a heart.
+- **Hover a pin** for a tooltip with the city, your note, and whether you loved it.
+- Countries you've visited are shaded differently from countries you haven't.
+- **Reset** button to jump back to the whole world.
 
-**Use your preferred IDE**
+### Your stats, clickable
+The passport header counts **CITIES**, **COUNTRIES** and **❤️ LOVED**. Each count opens its own list:
+visited cities grouped by country (countries alphabetical, cities alphabetical inside each),
+countries with their flag, or just the cities you've loved.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Your list
+Under the map, a searchable city picker on the left and your visited list on the right. From the list
+you can add a note (up to 500 characters), love a city, or remove it.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Public passports
+Anyone with your link can read your passport at `/p/<username>` — the map, the stamps, the notes.
+Only the owner's own browser session can edit it.
 
-Follow these steps:
+---
+
+## Tech stack
+
+| | |
+|---|---|
+| **Frontend** | React 18, TypeScript, Vite 5, Tailwind CSS 3, shadcn/ui |
+| **Routing / data** | react-router-dom 6, TanStack Query |
+| **Map** | react-simple-maps + d3-geo, with the `world-atlas` TopoJSON (110m) loaded from a CDN |
+| **Backend** | Lovable Cloud (Supabase): Postgres, auth, row-level security, edge functions |
+| **City search** | `search-cities` edge function → OpenStreetMap Nominatim (no API key required) |
+| **Type & style** | Press Start 2P (`font-pixel`) for headings, VT323 (`font-retro`) for body text |
+| **Tests / lint** | Vitest + Testing Library, ESLint 9 |
+
+The bright palette and chunky borders live in `src/index.css` as design tokens (`--pixel-yellow`,
+`--pixel-sky`, `--shadow-pixel`, and friends), exposed to Tailwind as `pixel-yellow`, `pixel-sky`,
+`pixel-border-sm`, `animate-bounce-pixel` and so on. Colors and shadows are referenced through those
+tokens rather than hardcoded, so the whole theme can be re-tinted in one file.
+
+---
+
+## Getting started
+
+You'll need Node.js 18+ and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
+npm run dev          # http://localhost:8080
 ```
 
-**Edit a file directly in GitHub**
+Other scripts:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run build        # production build to dist/
+npm run preview      # serve the production build locally
+npm run lint         # eslint .
+npm test             # vitest run
+npm run test:watch   # vitest in watch mode
+```
 
-**Use GitHub Codespaces**
+### Environment variables
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The app reads the backend address and publishable key from `.env`:
 
-## What technologies are used for this project?
+```
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_PUBLISHABLE_KEY=...
+```
 
-This project is built with:
+These are generated by Lovable Cloud for this project. Don't edit
+`src/integrations/supabase/client.ts` or `previewAuthStorage.ts` — they're generated.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Deploying
 
-## How can I deploy this project?
+In the Lovable editor: **Share → Publish**. To put it on your own domain, use
+**Project → Settings → Domains → Connect Domain**.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## Project layout
 
-Yes, you can!
+```
+src/
+  App.tsx                     routes: / (signed in), /auth, /p/:name, catch-all 404
+  index.css                   fonts, pixel palette tokens, pixel-border utilities
+  pages/
+    Index.tsx                 the passport: header + map + picker + list
+    Auth.tsx                  username + PIN sign-in / claim
+    PublicPassport.tsx        read-only passport for /p/:name
+    NotFound.tsx
+  components/
+    WorldMap.tsx              zoomable map, country expand, pins, hearts, tooltips
+    PassportHeader.tsx        stats + the three clickable lists
+    CityPicker.tsx            search box, local list + worldwide results
+    VisitedList.tsx           your cities, notes, love, remove
+  data/cities.ts              City type + 211 built-in cities
+  hooks/useAuth.tsx           session, user, loading, signOut
+supabase/
+  migrations/                 schema history (applied to Lovable Cloud)
+  functions/search-cities/    worldwide city search
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Data model
+
+Two tables in `public`, both with row-level security enabled.
+
+**`profiles`**
+
+| column | type | notes |
+|---|---|---|
+| `id` | uuid | primary key, mirrors the auth user, `ON DELETE CASCADE` |
+| `created_at` | timestamptz | defaults to `now()` |
+| `username` | text | 2–30 characters, unique case-insensitively via an index on `lower(username)` |
+
+A row is created automatically on sign-up by the `handle_new_user()` trigger on `auth.users`.
+
+**`visited_cities`**
+
+| column | type | notes |
+|---|---|---|
+| `id` | uuid | primary key |
+| `user_id` | uuid | the owner |
+| `city_name` | text | unique together with `user_id` |
+| `country` | text | |
+| `emoji` | text | usually the country flag |
+| `coordinates` | jsonb | `[lng, lat]` |
+| `visited_date` | text | optional |
+| `liked` | boolean | defaults to `false` |
+| `description` | text | your note, capped at 500 characters |
+| `created_at` | timestamptz | |
+
+**Access rules:** anyone can *read* `profiles` and `visited_cities` (that's what makes public
+passports possible), and only the owner can insert, update or delete their own rows. Every read from
+the app is additionally scoped to the signed-in user's own `user_id`.
+
+> The `username` column and its unique index were applied directly to the backend, so they're not in
+> a checked-in migration file yet; the files in `supabase/migrations/` cover the rest.
+
+---
+
+## How sign-in actually works
+
+Underneath, the backend's normal session machinery is still doing the work. A username is turned into
+a synthetic email address and the PIN into a password, so each username is one ordinary auth account
+with no email verification step. The PIN you type is therefore the only thing standing between
+someone else and your passport, and it's four digits.
+
+That's a deliberate trade-off: the data here is public by design and holds nothing sensitive, so the
+barrier is about claiming a name and keeping casual strangers out of your edits — not about
+protecting anything private. Consequences worth knowing:
+
+- A PIN is guessable by brute force; treat it as a lock on a diary, not a vault.
+- Clearing browser data on the device that created a passport, without the PIN to re-claim it,
+  means losing edit access to that passport.
+- Usernames can be handed over to someone else only by telling them the PIN.
+
+If a stronger model is ever wanted, the natural upgrades are a longer or optional-alphanumeric PIN,
+a real email for recovery, or rate limiting on sign-in attempts.
+
+---
+
+## City search
+
+`supabase/functions/search-cities/index.ts` is a Deno edge function with JWT verification turned off
+(configured in `supabase/config.toml`), because the picker calls it directly.
+
+It forwards the query to OpenStreetMap's free Nominatim geocoder and keeps only results that are
+genuine settlements or boundaries (`place`, `boundary`, city/town/village/municipality and similar
+types). It then rebuilds each result into the app's `City` shape — name, country, `[lng, lat]`, and a
+flag emoji derived from the country code — and removes duplicates by city + country. Results are
+merged into the picker above the built-in list, which is shown on its own while the query is shorter
+than two characters.
+
+Because Nominatim is a shared public service, its usage policy applies: queries are debounced by 400ms
+on the client, and a `User-Agent` identifying the app is sent with each request. If search starts
+returning nothing, that endpoint is the first thing to check.
+
+---
+
+## Notes
+
+- Hong Kong and Taiwan are listed as their own countries, with Taipei included alongside them.
+- The map's country shapes come from a CDN, so the map needs network access to render landmasses;
+  your saved cities come from the backend either way.
+- `src/test/example.test.ts` is the only test so far — a place to start adding real coverage.
